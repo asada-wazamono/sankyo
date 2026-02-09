@@ -1,0 +1,46 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  loginId   String   @unique
+  password  String
+  name      String
+  storeCode String?  @unique // Added for store identification
+  role      String   // "HQ" or "STORE"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  reports   Report[]
+}
+
+model Product {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  isMaster  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  reports   Report[]
+}
+
+model Report {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id])
+  productId      String?
+  product        Product? @relation(fields: [productId], references: [id])
+  customProductName String? // For temporary products
+  quantity       Int
+  category       String?  // Added for defect analysis (e.g., Damaged, Dirty, Missing)
+  comment        String?
+  imageUrl       String?
+  period         String   // "2024-01-A" (1-15) or "2024-01-B" (16-31)
+  isLocked       Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
